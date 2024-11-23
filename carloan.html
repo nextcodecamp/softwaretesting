@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>คำนวณเงินผ่อนรถยนต์</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .form-container {
+            max-width: 500px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: -10px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e9f7ef;
+            border: 1px solid #28a745;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>คำนวณเงินผ่อนรถยนต์</h1>
+    <div class="form-container">
+        <form id="loanForm">
+            <label for="loanAmount">ยอดเงินผ่อน (Loan Amount):</label>
+            <input type="number" id="loanAmount" name="loanAmount" required>
+            <div id="loanAmountError" class="error"></div>
+
+            <label for="interestRate">ดอกเบี้ยเงินผ่อน (% ต่อปี):</label>
+            <input type="number" id="interestRate" name="interestRate"  step="0.1" required>
+            <div id="interestRateError" class="error"></div>
+
+            <label for="loanTerm">จำนวนปีที่ผ่อน (Loan Term):</label>
+            <select id="loanTerm" name="loanTerm" required>
+                <option value="1">1 ปี</option>
+                <option value="2">2 ปี</option>
+                <option value="3">3 ปี</option>
+                <option value="4">4 ปี</option>
+                <option value="5">5 ปี</option>
+                <option value="6">6 ปี</option>
+                <option value="7">7 ปี</option>
+                <option value="8">8 ปี</option>
+                <option value="9">9 ปี</option>
+                
+            </select>
+            <div id="loanTermError" class="error"></div>
+
+            <button type="submit">คำนวณ</button>
+        </form>
+
+        <div id="result" class="result" style="display: none;">
+            <h3>ผลการคำนวณ</h3>
+            <p>ยอดเงินผ่อน: <span id="resultLoanAmount"></span> บาท</p>
+            <p>ดอกเบี้ย: <span id="resultInterestRate"></span> %</p>
+            <p>ระยะเวลา: <span id="resultLoanTerm"></span> ปี</p>
+            <p>ยอดผ่อนรายเดือน: <span id="monthlyPayment"></span> บาท</p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loanForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // Clear any previous error messages
+            clearErrors();
+
+            // Get form values
+            let loanAmount = parseFloat(document.getElementById('loanAmount').value);
+            let interestRate = parseFloat(document.getElementById('interestRate').value);
+            let loanTerm = parseInt(document.getElementById('loanTerm').value);
+
+            let isValid = true;
+
+            // Validate loan amount
+            if (loanAmount < 100000 || loanAmount > 1000000) {
+                document.getElementById('loanAmountError').textContent = 'ยอดเงินผ่อนต้องอยู่ระหว่าง 100,000 ถึง 1,000,000 บาท';
+                isValid = false;
+            }
+
+            // Validate interest rate
+            if (interestRate < 1.5 || interestRate > 3.5) {
+                document.getElementById('interestRateError').textContent = 'ดอกเบี้ยต้องอยู่ระหว่าง 1.5% ถึง 3.5% ต่อปี';
+                isValid = false;
+            }
+
+            // Validate loan term
+            if (loanTerm < 2 || loanTerm > 8) {
+                document.getElementById('loanTermError').textContent = 'จำนวนปีที่ผ่อนต้องอยู่ระหว่าง 2 ปี ถึง 8 ปี';
+                isValid = false;
+            }
+
+            // If form is valid, calculate the loan
+            if (isValid) {
+                let monthlyPayment = calculateMonthlyPayment(loanAmount, interestRate, loanTerm);
+
+                // Show result
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('resultLoanAmount').textContent = loanAmount.toFixed(2);
+                document.getElementById('resultInterestRate').textContent = interestRate.toFixed(1);
+                document.getElementById('resultLoanTerm').textContent = loanTerm;
+                document.getElementById('monthlyPayment').textContent = monthlyPayment.toFixed(2);
+            }
+        });
+
+        // Calculate monthly payment
+        function calculateMonthlyPayment(loanAmount, interestRate, loanTerm) {
+            let monthlyRate = interestRate
+            let numberOfPayments = loanTerm * 12;
+            let monthlyPayment = (loanAmount + (loanAmount * monthlyRate /100 * loanTerm ))/(numberOfPayments);
+            return monthlyPayment;
+        }
+
+        // Clear error messages
+        function clearErrors() {
+            document.getElementById('loanAmountError').textContent = '';
+            document.getElementById('interestRateError').textContent = '';
+            document.getElementById('loanTermError').textContent = '';
+        }
+    </script>
+</body>
+</html>
